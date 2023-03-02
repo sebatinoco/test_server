@@ -7,7 +7,12 @@ import torch.nn.functional as F
 from torch.utils.data import TensorDataset, DataLoader
 import sys
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# LISTAR GPUS
+available_gpus = [torch.cuda.device(i) for i in range(torch.cuda.device_count())]
+print(available_gpus)
+
+# SELECCIONAR GPU
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print(device)
 
 # cargamos datos
@@ -44,7 +49,7 @@ class MLP(nn.Module):
 
 # HIPERPARÁMETROS
 hidden_dim = 256
-model = MLP(input_dim = X.shape[1], output_dim = 3, hidden_dim = hidden_dim)
+model = MLP(input_dim = X.shape[1], output_dim = 3, hidden_dim = hidden_dim).to(device)
 epochs = 16
 lr = 1e-3
 optimizer = torch.optim.Adam(model.parameters(), lr = lr)
@@ -78,4 +83,3 @@ for epoch in range(epochs):
         correct += (predictions == labels).sum().item()
 
         sys.stdout.write(f'\rEpoch: {epoch+1:03d} \t Avg Train Loss: {running_loss/n_batches:.3f} \t Train Accuracy: {100 * correct/total:.2f} %') # print de loss promedio x epoca
-
